@@ -1,59 +1,56 @@
 """Thunder generator class"""
-from random import randint
+from random import randint, uniform
+from shapely.geometry import Point, Polygon
 
 
 class Thunder:
-    """Thunder simulator class."""
-    __coordinates = {
-        'lng': None,
-        'lat': None
+    """Thunder direction simulator class."""
+    __vector_random_range = (-0.45, 0.45)
+    __boundaries_lat = (0, 0)
+    __boundaries_lng = (0, 0)
+    __just_created = True
+    __vector_life = 8
+    __vector = {
+        'lng': 0.0,
+        'lat': 0.0
     }
-    __radius_steps = []
-    __thunder_size = None
-    __gradients_number = 3
-    __growth = 10
-    __rand_range = (0, 10)
 
-    def __init__(self, start_coordinates, coordinates_range, min_size, max_size,
-        gradient_size, longevity):
-        self.__coordinates = start_coordinates
-        self.__coordinates_range = coordinates_range
-        self.__min_size = min_size
-        self.__max_size = max_size
-        self.__thunder_size = min_size + self.__growth
-        self.__longevity = longevity
+    def __init__(self, id, lng, lat, borders):
+        self.__id = id
+        self.__lng = lng
+        self.__lat = lat
+        self.__borders = Polygon(borders)
 
-    def generate(self):
-        if len(self.__radius_steps) == 0:
-            return self.__generate_gradient()
-        else:
-            self.__calculate_scalar()
-            self.__calculate_thunder_size()
-            return self.__generate_gradient()
+    @property
+    def id(self):
+        return self.__id
 
-    def __generate_gradient(self):
-        self.__radius_steps = []
-        gradient_start = self.__thunder_size // self.__gradients_number
-        gradient = 0
-        for _ in range(self.__gradients_number):
-            gradient += gradient_start
-            self.__radius_steps.append(gradient)
-        return self.__radius_steps
-
-    def __calculate_scalar(self):
-        if self.__thunder_size >= self.__max_size:
-            self.__growth = -10
-            self.__rand_range = (-10, 2)
-        elif self.__thunder_size <= self.__min_size:
-            self.__growth = 10
-            self.__rand_range = (-2, 10)
-        else:
-            self.__growth = randint(*self.__rand_range)
-
-    def __calculate_thunder_size(self):
-        self.__thunder_size += self.__growth
-        self.__thunder_size = self.__thunder_size if self.__thunder_size > self.__min_size else self.__min_size
-        self.__thunder_size = self.__thunder_size if self.__thunder_size < self.__max_size else self.__max_size
+    def get_next_coordinates(self):
+        if self.__just_created:
+            self.__calculate_vector()
+            self.__just_created = False
+        return self.__calculate_coordinates()
 
     def __calculate_coordinates(self):
-        
+        if self.__vector_life > 0:
+            self.__vector_life -= 1
+        else:
+            self.__vector_life = 30
+            self.__calculate_vector()
+        self.__lng += self.__vector['lng']
+        self.__lat += self.__vector['lat']
+        point = Point( self.__lng, self.__lat)
+        inside_borders = point.within(self.__borders)
+        if not inside_borders:
+            self.__reverse_vector_direction()
+        return self.__id, self.__lng, self.__lat
+
+
+    def __calculate_vector(self):
+        self.__vector['lng'] = uniform(*self.__vector_random_range)
+        self.__vector['lat'] = uniform(*self.__vector_random_range)
+
+    def __reverse_vector_direction(self):
+        self.__vector_life = 30
+        self.__vector['lng'] = -self.__vector['lng']
+        self.__vector['lat'] = -self.__vector['lat']
