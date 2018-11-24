@@ -1,5 +1,6 @@
 """Calculation processor"""
 from multiprocessing import Pool
+from .thunder import Thunder
 
 
 def calculate_in_parallel(func_, thunders_number, *args):

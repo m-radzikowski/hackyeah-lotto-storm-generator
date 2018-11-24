@@ -1,0 +1,23 @@
+[
+    {
+        "coordinates": {
+            "lng": 1111.12,
+            "lat": 2222.12
+        },
+        "radiusSteps": [5, 10, 15]
+    },
+    {
+        "coordinates": {
+            "lng": 3122.12,
+            "lat": 777.12
+        },
+        "radiusSteps": [5, 15, 35]
+    },
+    {
+        "coordinates": {
+            "lng": 465.12,
+            "lat": 9707.12
+        },
+        "radiusSteps": [12, 16, 22]
+    },
+]
