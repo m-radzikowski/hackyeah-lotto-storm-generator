@@ -1,4 +1,4 @@
-"""Websocket client for simulation generator."""
+"""Websocket client sending package with active storms."""
 import asyncio
 import websocket
 import time
@@ -22,6 +22,7 @@ socket_address = 'ws://192.168.43.55:90/storm?server'
 
 
 def generate(ws):
+    """Generate package with active storms movement coordinates."""
     while True:
         t_start = time.time()
         if not locked:
@@ -32,47 +33,55 @@ def generate(ws):
             payload_msg = get_json_payload(data)
             ws.send(payload_msg)
             t_after = time.time()
-            for d in data:
-                print('id: {0} lng: {1}, lat: {2}'.format(d[0], d[1], d[2]))
+            print('Number of active storms: {}'.format(len(data)))
             time.sleep(1 - (t_after - t_start))
 
 
 def create(id):
+    """Create new storm with given id."""
     s = thunder_generator.Thunder(id, warsaw_loc['lng'], warsaw_loc['lat'], poland_polygon)
     storms.append(s)
 
 
 def remove(id):
+    """Remove storm of given id."""
     for s in storms:
         if s.id == id:
             storms.remove(s)
 
 
 def actions(command, id):
-    return {
+    """Dispatch corresponding action for given command."""
+    {
         'CREATE': create,
         'REMOVE': remove
     }.get(command, print)(id)
 
 
 def on_message(ws, message):
+    """Handle server message."""
     data = parse_json_to_data(message)
+    locked = True
     for d in data:
-        locked = True
-        print(d['commandType'], d['id'])
+        print('{} storm of id: {}'.format(d['commandType'], d['id']))
         actions(d['commandType'], d['id'])
-        locked = False
+    locked = False
 
 
 def on_error(ws, error):
+    """Handle server error."""
     print(error)
 
 
 def on_close(ws):
+    """Handle socket close."""
+    ws.close()
     print('Closed...')
 
 
 def on_open(ws):
+    """Handle socket connection when opened and
+    start separate thread for sending messages to server."""
     print('Connected...')
     t = Thread(
             target=generate,

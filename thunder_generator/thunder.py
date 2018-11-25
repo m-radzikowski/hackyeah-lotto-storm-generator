@@ -1,15 +1,16 @@
 """Thunder generator class"""
 from random import randint, uniform
 from shapely.geometry import Point, Polygon
+import numpy as np
 
 
 class Thunder:
     """Thunder direction simulator class."""
-    __vector_random_range = (-0.45, 0.45)
+    __vector_random_range = (-0.0099, 0.0099)
     __boundaries_lat = (0, 0)
     __boundaries_lng = (0, 0)
     __just_created = True
-    __vector_life = 8
+    __vector_life = randint(5, 10)
     __vector = {
         'lng': 0.0,
         'lat': 0.0
@@ -26,17 +27,19 @@ class Thunder:
         return self.__id
 
     def get_next_coordinates(self):
+        """Get next lng and lat coordinates of thunder position."""
         if self.__just_created:
             self.__calculate_vector()
             self.__just_created = False
         return self.__calculate_coordinates()
 
     def __calculate_coordinates(self):
+        """Calculate coordinates based on life vector."""
         if self.__vector_life > 0:
             self.__vector_life -= 1
         else:
-            self.__vector_life = 30
-            self.__calculate_vector()
+            self.__vector_life = randint(5, 10)
+            # self.__rotate_around_last_coordinates()
         self.__lng += self.__vector['lng']
         self.__lat += self.__vector['lat']
         point = Point( self.__lng, self.__lat)
@@ -45,12 +48,24 @@ class Thunder:
             self.__reverse_vector_direction()
         return self.__id, self.__lng, self.__lat
 
-
     def __calculate_vector(self):
+        """Calculate vector for given life."""
         self.__vector['lng'] = uniform(*self.__vector_random_range)
         self.__vector['lat'] = uniform(*self.__vector_random_range)
 
     def __reverse_vector_direction(self):
-        self.__vector_life = 30
+        """Reverse vector direction and recalculate life."""
+        self.__vector_life = randint(5, 10)
         self.__vector['lng'] = -self.__vector['lng']
         self.__vector['lat'] = -self.__vector['lat']
+
+    def __rotate_around_last_coordinates(self):
+        """Rotate a point around a last coordinates."""
+        x, y = self.__lng, self.__lat
+        offset_x, offset_y = self.__lng - self.__vector['lng'], self.__lat - self.__vector['lat']
+        adjusted_x = (x - offset_x)
+        adjusted_y = (y - offset_y)
+        cos_rad = math.cos(radians)
+        sin_rad = math.sin(radians)
+        self.__vector['lng'] = offset_x + cos_rad * adjusted_x + sin_rad * adjusted_y
+        self.__vector['lat'] = offset_y + -sin_rad * adjusted_x + cos_rad * adjusted_y
