@@ -11,10 +11,19 @@ from services import get_json_payload, parse_json_to_data, load_geo_json
 from copy import deepcopy
 
 
+warsaw_polygon = [
+    [20.887139, 52.364040],
+    [21.068216, 52.376500],
+    [21.228303, 52.282293],
+    [21.275555, 52.153123],
+    [21.115990, 52.088304],
+    [20.957783, 52.108739],
+    [20.765620, 52.201336]
+]
+is_warsaw = True
 poland_polygon = None
 locked = False
-vector_range = (-0.099, 0.099)
-num_of_storms = 10
+vector_range = (-0.059, 0.059)
 storms = []
 
 socket_address = 'ws://192.168.43.245:90/storm?server'
@@ -34,7 +43,7 @@ def calculate_vector_coords(range):
 
 def calculate_vector_life():
     """Calculate vector for given life."""
-    return random.randint(5, 10)
+    return random.randint(5, 15)
 
 
 def generate(ws):
@@ -45,7 +54,6 @@ def generate(ws):
             data = []
             for s in storms:
                 d = s.get_next_coordinates()
-                print('coordinates {}'.format(d))
                 data.append(d)
             payload_msg = get_json_payload(data)
             ws.send(payload_msg)
@@ -58,8 +66,16 @@ def create(id):
     """Create new storm with given id."""
     life = calculate_vector_life()
     vector = calculate_vector_coords(vector_range)
-    start_lat = random.uniform(50.00, 52.00)
-    start_lng = random.uniform(20.00, 22.00)
+    # start_lat = random.uniform(50.82355, 53.266994)
+    # start_lng = random.uniform(19.999999, 22.068806)
+    if is_warsaw:
+        start_lat = random.uniform(50.82355, 53.266994)
+        start_lng = random.uniform(19.999999, 22.068806)
+        is_warsaw = False
+    else:
+        start_lat = random.uniform(49.82355, 54.266994)
+        start_lng = random.uniform(19.999999, 22.068806)
+    print(start_lat, start_lng)
     s = thunder_generator.Thunder(
         id,
         deepcopy(start_lat),

@@ -42,7 +42,7 @@ class Thunder:
             self.__vector_life -= 1
         else:
             self.__vector_life = random.randint(5, 10)
-            # self.__rotate_around_last_coordinates()
+            self.__recalculate_vector()
         self.__lat += self.__vector_lat
         self.__lng += self.__vector_lng
         point = Point(self.__lng, self.__lat) # needs to be in revers sequance for geojson list
@@ -57,15 +57,18 @@ class Thunder:
         self.__vector_lat = -self.__vector_lat
         self.__vector_lng = -self.__vector_lng
 
-    def __rotate_around_last_coordinates(self):
-        """Rotate a point around a last coordinates."""
-        degrees = random.randint(-30, 30)
-        radians = math.radians(degrees)
-        x, y = self.__lat, self.__lng
-        offset_x, offset_y = self.__lat - self.__vector_lat, self.__lng - self.__vector_lng
-        adjusted_x = (x - offset_x)
-        adjusted_y = (y - offset_y)
-        cos_rad = math.cos(radians)
-        sin_rad = math.sin(radians)
-        self.__vector_lat = offset_x + cos_rad * adjusted_x + sin_rad * adjusted_y
-        self.__vector_lng = offset_y + -sin_rad * adjusted_x + cos_rad * adjusted_y
+    def __recalculate_vector(self):
+        """Change vector direction."""
+        # radians = random.uniform(-0.2, 0.2)
+        print('Vector before recalculated has lat {} lng{}'.format(self.__vector_lat, self.__vector_lng))
+        # x, y = self.__lat, self.__lng
+        # offset_x, offset_y = self.__lat - self.__vector_lat, self.__lng - self.__vector_lng
+        # adjusted_x = (x - offset_x)
+        # adjusted_y = (y - offset_y)
+        # cos_rad = math.cos(radians)
+        # sin_rad = math.sin(radians)
+        # self.__vector_lat = offset_x + cos_rad * adjusted_x + sin_rad * adjusted_y
+        # self.__vector_lng = offset_y + -sin_rad * adjusted_x + cos_rad * adjusted_y
+        self.__vector_lat = random.uniform(-0.059, 0.059)
+        self.__vector_lng = random.uniform(-0.059, 0.059)
+        print('Vector after recalculated to lat {} lng {}'.format(self.__vector_lat, self.__vector_lng))
