@@ -6,6 +6,7 @@ import os
 from threading import Thread
 import thunder_generator
 from services import get_json_payload, parse_json_to_data, load_geo_json
+from copy import deepcopy
 
 
 poland_polygon = None
@@ -17,7 +18,7 @@ warsaw_loc = {
 num_of_storms = 10
 storms = []
 
-socket_address = 'ws://192.168.43.55:90/storm?server'
+socket_address = 'ws://192.168.43.245:90/storm?server'
 # socket_address = 'ws://10.250.194.196:90/storm?server'
 
 
@@ -30,6 +31,7 @@ def generate(ws):
             for s in storms:
                 d = s.get_next_coordinates()
                 data.append(d)
+                print(d)
             payload_msg = get_json_payload(data)
             ws.send(payload_msg)
             t_after = time.time()
@@ -39,7 +41,7 @@ def generate(ws):
 
 def create(id):
     """Create new storm with given id."""
-    s = thunder_generator.Thunder(id, warsaw_loc['lng'], warsaw_loc['lat'], poland_polygon)
+    s = thunder_generator.Thunder(id, deepcopy(warsaw_loc['lng']), deepcopy(warsaw_loc['lat']), poland_polygon)
     storms.append(s)
 
 
