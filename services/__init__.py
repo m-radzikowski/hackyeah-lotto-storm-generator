@@ -9,8 +9,8 @@ def get_json_payload(data):
         thunders.append(
             {
                 'id': d[0],
-                'lng': d[1],
-                'lat': d[2]
+                'lat': d[1],
+                'lng': d[2]
             }
         )
     return json.dumps(thunders)

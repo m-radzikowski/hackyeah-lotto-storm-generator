@@ -3,7 +3,9 @@ import asyncio
 import websocket
 import time
 import os
+import sys
 from threading import Thread
+import random
 import thunder_generator
 from services import get_json_payload, parse_json_to_data, load_geo_json
 from copy import deepcopy
@@ -11,15 +13,28 @@ from copy import deepcopy
 
 poland_polygon = None
 locked = False
-warsaw_loc = {
-    'lat': 52.2922104,
-    'lng': 21.0023798
-}
+vector_range = (-0.099, 0.099)
 num_of_storms = 10
 storms = []
 
 socket_address = 'ws://192.168.43.245:90/storm?server'
 # socket_address = 'ws://10.250.194.196:90/storm?server'
+
+
+def calculate_vector_coords(range):
+    """Calculate vector coordinates."""
+    vector = {
+        'lat': 0.0,
+        'lng': 0.0
+    }
+    vector['lat'] = random.uniform(*range)
+    vector['lng'] = random.uniform(*range)
+    return vector
+
+
+def calculate_vector_life():
+    """Calculate vector for given life."""
+    return random.randint(5, 10)
 
 
 def generate(ws):
@@ -30,8 +45,8 @@ def generate(ws):
             data = []
             for s in storms:
                 d = s.get_next_coordinates()
+                print('coordinates {}'.format(d))
                 data.append(d)
-                print(d)
             payload_msg = get_json_payload(data)
             ws.send(payload_msg)
             t_after = time.time()
@@ -41,7 +56,18 @@ def generate(ws):
 
 def create(id):
     """Create new storm with given id."""
-    s = thunder_generator.Thunder(id, deepcopy(warsaw_loc['lng']), deepcopy(warsaw_loc['lat']), poland_polygon)
+    life = calculate_vector_life()
+    vector = calculate_vector_coords(vector_range)
+    start_lat = random.uniform(50.00, 52.00)
+    start_lng = random.uniform(20.00, 22.00)
+    s = thunder_generator.Thunder(
+        id,
+        deepcopy(start_lat),
+        deepcopy(start_lng),
+        poland_polygon,
+        life,
+        vector
+        )
     storms.append(s)
 
 
@@ -94,6 +120,7 @@ def on_open(ws):
 
 
 if __name__ == "__main__":
+    random.seed(time.time())
     file_path = os.path.dirname(os.path.abspath(__file__)) + '/geo_data/custom.geo.json'
     poland_polygon = load_geo_json(file_path)
     # websocket.enableTrace(True)
